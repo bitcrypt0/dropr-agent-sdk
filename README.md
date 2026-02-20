@@ -218,6 +218,100 @@ await ensureERC20Approval(
 );
 ```
 
+## External NFT Collections & the IMintable Interface
+
+NFT Drop pools on dropr.fun support two sources of NFT prizes:
+
+1. **Protocol-deployed collections** — deployed via `NFTFactory` through the dropr UI or Agent API (`/collections/deploy`). These already implement the required interface.
+2. **Externally deployed collections** — custom ERC-721 or ERC-1155 contracts deployed outside of dropr.fun.
+
+For externally deployed collections to be used as prizes in NFT Drop pools, they **must implement the `IMintable` interface**. This interface allows the Pool contract to check available supply, allocate tokens for prizes, mint to winners, and restore allocations if a pool is deleted or goes unengaged.
+
+### IMintable.sol
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.19;
+
+/**
+ * @title IMintable
+ * @dev Interface that all external prize contracts must implement to be compatible with PoolDeployer
+ * Combines the essential functions needed for prize allocation, minting, and restoration
+ */
+interface IMintable {
+    /**
+     * @dev Returns the available supply for the specified token (ERC1155) or entire collection (ERC721)
+     * Must account for already allocated supply to other pools
+     */
+    function availableSupply() external view returns (uint256);
+    
+    /**
+     * @dev ERC1155 variant: Returns available supply for a specific token ID
+     */
+    function availableSupply(uint256 tokenId) external view returns (uint256);
+    
+    /**
+     * @dev Sets the minter (pool contract) and allocates the specified amount for prizes
+     * ERC721 variant: allocates number of tokens
+     */
+    function setMinterAndAllocation(address minter, uint256 allocation) external;
+    
+    /**
+     * @dev ERC1155 variant: Sets minter and allocates amount for a specific token ID
+     */
+    function setMinterAndAllocation(address minter, uint256 tokenId, uint256 allocation) external;
+    
+    /**
+     * @dev Mints prizes to winners from pool contracts
+     * ERC721 variant: mints specified quantity
+     */
+    function mint(address to, uint256 quantity) external;
+    
+    /**
+     * @dev ERC1155 variant: mints specified amount of a token ID to winners from pool contracts
+     */
+    function mint(address to, uint256 id, uint256 amount) external;
+    
+    /**
+     * @dev Called from pool contracts to restore allocated supply to available supply
+     * When the pool is deleted or unengaged
+     * ERC721 variant: restores allocation for the pool
+     */
+    function restoreMinterAllocation(address pool) external;
+    
+    /**
+     * @dev ERC1155 variant: restores allocation for a specific pool and token ID
+     */
+    function restoreMinterAllocation(address pool, uint256 tokenId) external;
+}
+```
+
+### Standard-Specific Subsets
+
+If your collection only supports one NFT standard, you can implement the relevant subset:
+
+**ERC-721 only:**
+```solidity
+interface IMintableERC721 {
+    function availableSupply() external view returns (uint256);
+    function setMinterAndAllocation(address minter, uint256 allocation) external;
+    function mint(address to, uint256 quantity) external;
+    function restoreMinterAllocation(address pool) external;
+}
+```
+
+**ERC-1155 only:**
+```solidity
+interface IMintableERC1155 {
+    function availableSupply(uint256 tokenId) external view returns (uint256);
+    function setMinterAndAllocation(address minter, uint256 tokenId, uint256 allocation) external;
+    function mint(address to, uint256 id, uint256 amount) external;
+    function restoreMinterAllocation(address pool, uint256 tokenId) external;
+}
+```
+
+> **Note:** Collections deployed via the dropr.fun `NFTFactory` (through the UI or the `/collections/deploy` Agent API endpoint) already implement `IMintable` — no additional work is needed. The interface is only required for collections deployed externally.
+
 ## License
 
 MIT
