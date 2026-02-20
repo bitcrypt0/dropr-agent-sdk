@@ -1,0 +1,23 @@
+{
+  "name": "dropr-agent-sdk",
+  "version": "0.1.0",
+  "description": "Headless TypeScript SDK for AI agents to interact with the dropr.fun protocol",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["dropr", "nft", "agent", "sdk", "web3", "ethereum"],
+  "author": "dropr.fun",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "ethers": "^5.7.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

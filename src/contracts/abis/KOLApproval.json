@@ -1,0 +1,36 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "KOLApproval",
+  "sourceName": "contracts/KOLApproval.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        { "indexed": true, "internalType": "address", "name": "kol", "type": "address" },
+        { "indexed": false, "internalType": "uint256", "name": "poolLimit", "type": "uint256" },
+        { "indexed": false, "internalType": "uint256", "name": "enforcedSlotFee", "type": "uint256" },
+        { "indexed": false, "internalType": "uint256", "name": "enforcedWinnerCount", "type": "uint256" }
+      ],
+      "name": "KOLApproved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        { "indexed": true, "internalType": "address", "name": "kol", "type": "address" },
+        { "indexed": true, "internalType": "address", "name": "pool", "type": "address" }
+      ],
+      "name": "KOLPoolCreated",
+      "type": "event"
+    },
+    { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "kol", "type": "address" } ], "name": "KOLRevoked", "type": "event" },
+    { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" } ], "name": "OwnershipTransferred", "type": "event" },
+    { "inputs": [ { "internalType": "address", "name": "_kol", "type": "address" }, { "internalType": "uint256", "name": "_poolLimit", "type": "uint256" }, { "internalType": "uint256", "name": "_enforcedSlotFee", "type": "uint256" }, { "internalType": "uint256", "name": "_enforcedWinnerCount", "type": "uint256" } ], "name": "approveKOL", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+    { "inputs": [ { "internalType": "address", "name": "_kol", "type": "address" } ], "name": "getKOLApprovalDetails", "outputs": [ { "internalType": "bool", "name": "approved", "type": "bool" }, { "internalType": "uint256", "name": "poolLimit", "type": "uint256" }, { "internalType": "uint256", "name": "enforcedSlotFee", "type": "uint256" }, { "internalType": "uint256", "name": "enforcedWinnerCount", "type": "uint256" }, { "internalType": "uint256", "name": "poolCount", "type": "uint256" } ], "stateMutability": "view", "type": "function" },
+    { "inputs": [ { "internalType": "address", "name": "", "type": "address" } ], "name": "kolApprovals", "outputs": [ { "internalType": "bool", "name": "approved", "type": "bool" }, { "internalType": "uint256", "name": "poolLimit", "type": "uint256" }, { "internalType": "uint256", "name": "enforcedSlotFee", "type": "uint256" }, { "internalType": "uint256", "name": "enforcedWinnerCount", "type": "uint256" }, { "internalType": "uint256", "name": "poolCount", "type": "uint256" } ], "stateMutability": "view", "type": "function" },
+    { "inputs": [], "name": "owner", "outputs": [ { "internalType": "address", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" },
+    { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+    { "inputs": [ { "internalType": "address", "name": "_kol", "type": "address" } ], "name": "revokeKOL", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+    { "inputs": [ { "internalType": "address", "name": "newOwner", "type": "address" } ], "name": "transferOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }
+  ]
+}
