@@ -15,9 +15,12 @@ All write operations return **unsigned transaction parameters** (Params Mode). Y
 ## Installation
 
 ```bash
-npm install dropr-agent-sdk
-# or
-yarn add dropr-agent-sdk
+# Clone the repository
+git clone https://github.com/bitcrypt0/dropr-agent-sdk.git
+
+# Install dependencies
+cd dropr-agent-sdk
+npm install
 ```
 
 ## Quick Start
