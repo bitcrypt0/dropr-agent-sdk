@@ -72,4 +72,5 @@ export type {
   AgentClientConfig,
   Unsubscribe,
   PurchaseAuth,
+  WhitelistPoolParams,
 } from "./types";

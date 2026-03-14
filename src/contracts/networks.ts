@@ -16,6 +16,7 @@ export const SUPPORTED_NETWORKS: Record<number, NetworkInfo> = {
       socialEngagementManager: "0x...",
       rewardsFlywheel: "0x...",
       purchaseAuthorizer: "0x...",
+      poolRouter: "0x...",
     },
   },
   10: {
@@ -31,6 +32,7 @@ export const SUPPORTED_NETWORKS: Record<number, NetworkInfo> = {
       socialEngagementManager: "0x...",
       rewardsFlywheel: "0x...",
       purchaseAuthorizer: "0x...",
+      poolRouter: "0x...",
     },
   },
   56: {
@@ -46,6 +48,7 @@ export const SUPPORTED_NETWORKS: Record<number, NetworkInfo> = {
       socialEngagementManager: "0x...",
       rewardsFlywheel: "0x...",
       purchaseAuthorizer: "0x...",
+      poolRouter: "0x...",
     },
   },
   97: {
@@ -61,6 +64,7 @@ export const SUPPORTED_NETWORKS: Record<number, NetworkInfo> = {
       socialEngagementManager: "0x...",
       rewardsFlywheel: "0x...",
       purchaseAuthorizer: "0x...",
+      poolRouter: "0x...",
     },
   },
   8453: {
@@ -76,6 +80,7 @@ export const SUPPORTED_NETWORKS: Record<number, NetworkInfo> = {
       socialEngagementManager: "0x...",
       rewardsFlywheel: "0x...",
       purchaseAuthorizer: "0x...",
+      poolRouter: "0x...",
     },
   },
   84532: {
@@ -84,13 +89,14 @@ export const SUPPORTED_NETWORKS: Record<number, NetworkInfo> = {
     explorer: "https://sepolia.basescan.org",
     nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
     contractAddresses: {
-      protocolManager: '0x5eb752D45906eb32619F1fE6d5005734F10C3da2',
-      poolDeployer: '0x69602037B275Cc9506519AA1cE66b843C127bc7a',
-      revenueManager: '0x09C08a2E6465e8abD75F854FC3C7D01344964FaA',
-      nftFactory: '0x959c429900c63D2D1F453BA4c64FBa04DBFBF6f3',
-      rewardsFlywheel: '0xF6635D6F8527728a629D5CCDdaF985eCd88B820a',
-      socialEngagementManager: '0xfC6343eC4A06F64363dAEbe17D72d092F4aB8EE0',
-      purchaseAuthorizer: '0x06569388e82E7FE6d8d19e449ef41B0f571073c1'
+      protocolManager: '0x03d10c62c758403758C51BA602b79407CC81F5A4',
+      poolDeployer: '0x30164221adACBE21C6147915788B8e367D80bAc5',
+      revenueManager: '0x375E45CcFc64349444810Cc3152238429aa98961',
+      nftFactory: '0xf74041656A120d41D3eC7265c1301bAAd216013f',
+      rewardsFlywheel: '0xEC9aE50558d7dEE8211C3faF2e3ce1cDDa2db8Ec',
+      poolRouter: '0x1291657b949c1f3070eC2f236a66299A5FD5f1b1',
+      socialEngagementManager: '0x7d371eef83e84702624CeC09e392dBD88A97B330',
+      purchaseAuthorizer: '0x7BCCAA360fE0688DcB34Edba87EfEB1C376Abedc'
     },
   },
   11155111: {
@@ -106,6 +112,7 @@ export const SUPPORTED_NETWORKS: Record<number, NetworkInfo> = {
       socialEngagementManager: "0x...",
       rewardsFlywheel: "0x...",
       purchaseAuthorizer: "0x...",
+      poolRouter: "0x...",
     },
   },
   11155420: {
@@ -120,7 +127,8 @@ export const SUPPORTED_NETWORKS: Record<number, NetworkInfo> = {
       nftFactory: '0xDCa93973C41915F544f14Ca44de2697028888B1C',
       rewardsFlywheel: '0x7d21c990bf7D2E1d691Cc082F7ba121D3A7d868B',
       socialEngagementManager: '0x4308Fb2CCe656D99D791b48eeACbf0E077D7928C',
-      purchaseAuthorizer: '0x7fB0Bb9Ee9a1b20248Ed3E7201fFCd0e8C2E45Db'
+      purchaseAuthorizer: '0x7fB0Bb9Ee9a1b20248Ed3E7201fFCd0e8C2E45Db',
+      poolRouter: '0x...',
     },
   },
   43113: {
@@ -136,6 +144,7 @@ export const SUPPORTED_NETWORKS: Record<number, NetworkInfo> = {
       socialEngagementManager: "0x...",
       rewardsFlywheel: "0x...",
       purchaseAuthorizer: "0x...",
+      poolRouter: "0x...",
     },
   },
   43114: {
@@ -151,6 +160,7 @@ export const SUPPORTED_NETWORKS: Record<number, NetworkInfo> = {
       socialEngagementManager: "0x...",
       rewardsFlywheel: "0x...",
       purchaseAuthorizer: "0x...",
+      poolRouter: "0x...",
     },
   },
   2020: {
@@ -166,6 +176,7 @@ export const SUPPORTED_NETWORKS: Record<number, NetworkInfo> = {
       socialEngagementManager: "0x...",
       rewardsFlywheel: "0x...",
       purchaseAuthorizer: "0x...",
+      poolRouter: "0x...",
     },
   },
   2021: {
@@ -181,6 +192,7 @@ export const SUPPORTED_NETWORKS: Record<number, NetworkInfo> = {
       socialEngagementManager: "0x...",
       rewardsFlywheel: "0x...",
       purchaseAuthorizer: "0x...",
+      poolRouter: "0x...",
     },
   },
   42161: {
@@ -196,6 +208,7 @@ export const SUPPORTED_NETWORKS: Record<number, NetworkInfo> = {
       socialEngagementManager: "0x...",
       rewardsFlywheel: "0x...",
       purchaseAuthorizer: "0x...",
+      poolRouter: "0x...",
     },
   },
   421614: {
@@ -211,6 +224,7 @@ export const SUPPORTED_NETWORKS: Record<number, NetworkInfo> = {
       socialEngagementManager: "0x...",
       rewardsFlywheel: "0x...",
       purchaseAuthorizer: "0x...",
+      poolRouter: "0x...",
     },
   },
 };

@@ -7,7 +7,8 @@ export type ContractName =
   | "nftFactory"
   | "socialEngagementManager"
   | "rewardsFlywheel"
-  | "purchaseAuthorizer";
+  | "purchaseAuthorizer"
+  | "poolRouter";
 
 const ZERO = "0x...";
 

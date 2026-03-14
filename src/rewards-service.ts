@@ -413,67 +413,34 @@ export class RewardsService {
   // ─── Manual Point Allocation ───
 
   /**
-   * Claim participant reward points for a pool.
-   * Points are claimed by calling claimParticipantPoints() on the Pool contract directly,
-   * NOT by calling allocateParticipantPoints() on the RewardsFlywheel.
+   * Batch-claim participant reward points from multiple pools via the PoolRouter contract.
+   * The PoolRouter handles individual pool failures gracefully on-chain.
    */
-  async claimParticipantPoints(poolAddress: string): Promise<TxResult> {
-    const poolContract = this.wallet.getPoolContract(poolAddress);
+  async batchClaimParticipantPoints(poolAddresses: string[]): Promise<TxResult> {
+    if (poolAddresses.length === 0) {
+      throw new NotEligibleError("No pool addresses provided", "no_pools");
+    }
 
-    // Idempotency: check if already claimed
+    const router = this.wallet.getContract("poolRouter");
     const userAddress = this.wallet.getAddress();
-    const alreadyClaimed = await this.isParticipantPointsAllocated(
-      poolAddress,
-      userAddress
-    );
-    if (alreadyClaimed) {
-      throw new NotEligibleError(
-        "Participant points already claimed for this pool",
-        "already_claimed"
-      );
-    }
 
-    try {
-      await poolContract.callStatic.claimParticipantPoints();
-    } catch (err) {
-      throw new TransactionRevertedError(
-        `Claim participant points would revert: ${extractRevertReason(err)}`,
-        extractRevertReason(err)
-      );
-    }
-
-    const tx = await poolContract.claimParticipantPoints();
+    const tx = await router.batchClaimParticipantPoints(userAddress, poolAddresses);
     const receipt = await tx.wait();
     return { txHash: receipt.transactionHash };
   }
 
   /**
-   * Claim creator reward points for a pool.
-   * Points are claimed by calling claimCreatorPoints() on the Pool contract directly,
-   * NOT by calling allocateCreatorPoints() on the RewardsFlywheel.
+   * Batch-claim creator reward points from multiple pools via the PoolRouter contract.
+   * The PoolRouter handles individual pool failures gracefully on-chain.
    */
-  async claimCreatorPoints(poolAddress: string): Promise<TxResult> {
-    const poolContract = this.wallet.getPoolContract(poolAddress);
-
-    // Idempotency
-    const alreadyClaimed = await this.isCreatorPointsAllocated(poolAddress);
-    if (alreadyClaimed) {
-      throw new NotEligibleError(
-        "Creator points already claimed for this pool",
-        "already_claimed"
-      );
+  async batchClaimCreatorPoints(poolAddresses: string[]): Promise<TxResult> {
+    if (poolAddresses.length === 0) {
+      throw new NotEligibleError("No pool addresses provided", "no_pools");
     }
 
-    try {
-      await poolContract.callStatic.claimCreatorPoints();
-    } catch (err) {
-      throw new TransactionRevertedError(
-        `Claim creator points would revert: ${extractRevertReason(err)}`,
-        extractRevertReason(err)
-      );
-    }
+    const router = this.wallet.getContract("poolRouter");
 
-    const tx = await poolContract.claimCreatorPoints();
+    const tx = await router.batchClaimCreatorPoints(poolAddresses);
     const receipt = await tx.wait();
     return { txHash: receipt.transactionHash };
   }

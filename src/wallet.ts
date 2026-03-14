@@ -25,6 +25,7 @@ const ABI_MAP: Record<ContractName, string> = {
   socialEngagementManager: "socialEngagementManager",
   rewardsFlywheel: "rewardsFlywheel",
   purchaseAuthorizer: "purchaseAuthorizer",
+  poolRouter: "poolRouter",
 };
 
 /**

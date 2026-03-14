@@ -246,35 +246,24 @@ export class PoolService {
     return { txHash: receipt.transactionHash };
   }
 
-  // ─── Refund Claims ───
+  // --- Refund Claims ---
 
   /**
-   * Claim a slot fee refund from a pool.
+   * Batch-claim slot fee refunds from multiple pools via the PoolRouter contract.
+   * The PoolRouter handles individual pool failures gracefully on-chain.
    */
-  async claimRefund(poolAddress: string): Promise<TxResult> {
-    const poolContract = this.wallet.getPoolContract(poolAddress);
+  async batchClaimRefunds(poolAddresses: string[]): Promise<TxResult> {
+    if (poolAddresses.length === 0) {
+      throw new NotEligibleError("No pool addresses provided", "no_pools");
+    }
+
+    const router = this.wallet.getContract("poolRouter");
     const userAddress = this.wallet.getAddress();
 
-    // Idempotency: check if already claimed
-    const alreadyClaimed = await this._isRefundClaimed(poolAddress, userAddress);
-    if (alreadyClaimed) {
-      throw new NotEligibleError("Refund already claimed", "already_claimed");
-    }
-
-    try {
-      await poolContract.callStatic.claimRefund();
-    } catch (err) {
-      throw new TransactionRevertedError(
-        `Refund claim would revert: ${extractRevertReason(err)}`,
-        extractRevertReason(err)
-      );
-    }
-
-    const tx = await poolContract.claimRefund();
+    const tx = await router.batchClaimRefunds(userAddress, poolAddresses);
     const receipt = await tx.wait();
     return { txHash: receipt.transactionHash };
   }
-
   // ─── Pool Deletion ───
 
   /**
@@ -482,21 +471,17 @@ export class PoolService {
   // ─── Creator Revenue ───
 
   /**
-   * Withdraw creator revenue from a completed pool.
+   * Batch-withdraw creator revenue from multiple pools via the PoolRouter contract.
+   * The PoolRouter handles individual pool failures gracefully on-chain.
    */
-  async withdrawCreatorRevenue(poolAddress: string): Promise<TxResult> {
-    const poolContract = this.wallet.getPoolContract(poolAddress);
-
-    try {
-      await poolContract.callStatic.withdrawCreatorRevenue();
-    } catch (err) {
-      throw new TransactionRevertedError(
-        `Revenue withdrawal would revert: ${extractRevertReason(err)}`,
-        extractRevertReason(err)
-      );
+  async batchWithdrawCreatorRevenue(poolAddresses: string[]): Promise<TxResult> {
+    if (poolAddresses.length === 0) {
+      throw new NotEligibleError("No pool addresses provided", "no_pools");
     }
 
-    const tx = await poolContract.withdrawCreatorRevenue();
+    const router = this.wallet.getContract("poolRouter");
+
+    const tx = await router.batchWithdrawCreatorRevenue(poolAddresses);
     const receipt = await tx.wait();
     return { txHash: receipt.transactionHash };
   }
@@ -556,7 +541,13 @@ export class PoolService {
         return { success: false, error: `HTTP ${response.status}: ${errorText}` };
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as {
+        success?: boolean;
+        signature?: string;
+        deadline?: number;
+        expires_at?: string;
+        error?: string;
+      };
       if (!data.success) {
         return { success: false, error: data.error || "Authorization failed" };
       }
@@ -605,7 +596,13 @@ export class PoolService {
         return { success: false, error: `HTTP ${response.status}: ${errorText}` };
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as {
+        success?: boolean;
+        signature?: string;
+        deadline?: number;
+        expires_at?: string;
+        error?: string;
+      };
       if (!data.success) {
         return { success: false, error: data.error || "Social signature generation failed" };
       }

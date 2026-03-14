@@ -243,6 +243,16 @@ export interface ProtocolStats {
   [key: string]: unknown;
 }
 
+// --- Whitelist Types ---
+
+export interface WhitelistPoolParams {
+  poolAddress: string;
+  allocation: number;
+  mintsPerWin: number;
+  mintPrice: string; // in wei
+  tokenId?: number;  // ERC1155 only
+}
+
 // ─── Transaction Types ───
 
 export interface TxResult {

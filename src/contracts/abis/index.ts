@@ -9,6 +9,7 @@ import SocialEngagementManagerJSON from "./SocialEngagementManager.json";
 import KOLApprovalJSON from "./KOLApproval.json";
 import RewardsFlywheelJSON from "./RewardsFlywheel.json";
 import PurchaseAuthorizerJSON from "./PurchaseAuthorizer.json";
+import PoolRouterJSON from "./PoolRouter.json";
 
 export const ProtocolManagerABI = ProtocolManagerJSON.abi;
 export const PoolDeployerABI = PoolDeployerJSON.abi;
@@ -21,6 +22,7 @@ export const SocialEngagementManagerABI = SocialEngagementManagerJSON.abi;
 export const KOLApprovalABI = KOLApprovalJSON.abi;
 export const RewardsFlywheelABI = RewardsFlywheelJSON.abi;
 export const PurchaseAuthorizerABI = PurchaseAuthorizerJSON.abi;
+export const PoolRouterABI = PoolRouterJSON.abi;
 
 export const ERC20ABI = [
   "function allowance(address owner, address spender) view returns (uint256)",
@@ -45,5 +47,6 @@ export const contractABIs: Record<string, unknown[]> = {
   rewardsFlywheel: RewardsFlywheelABI,
   pool: PoolABI,
   purchaseAuthorizer: PurchaseAuthorizerABI,
+  poolRouter: PoolRouterABI,
   erc20: ERC20ABI as unknown[],
 };

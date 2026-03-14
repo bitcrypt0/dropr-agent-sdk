@@ -12,6 +12,7 @@ import type {
   CollectionInfo,
   KOLDetails,
   TxResult,
+  WhitelistPoolParams,
 } from "./types";
 
 // ERC165 interface IDs
@@ -523,6 +524,89 @@ export class CollectionService {
         ? Number(data.vesting_duration_between_unlocks)
         : null,
     };
+  }
+
+  // ─── Whitelist Pool Management ───
+
+  /**
+   * Add a whitelist pool allocation to a collection.
+   * ERC721: addWhitelistPool(pool, allocation, mintsPerWin, mintPrice)
+   * ERC1155: addWhitelistPool(pool, tokenId, allocation, mintsPerWin, mintPrice)
+   */
+  async addWhitelistPool(
+    collectionAddress: string,
+    params: WhitelistPoolParams
+  ): Promise<TxResult> {
+    const is721 = await this.isERC721(collectionAddress);
+    const contract = is721
+      ? this.wallet.getERC721Contract(collectionAddress)
+      : this.wallet.getERC1155Contract(collectionAddress);
+
+    const mintPriceWei = ethers.BigNumber.from(params.mintPrice);
+    const args = is721
+      ? [params.poolAddress, params.allocation, params.mintsPerWin, mintPriceWei]
+      : [params.poolAddress, params.tokenId!, params.allocation, params.mintsPerWin, mintPriceWei];
+
+    try {
+      await contract.callStatic.addWhitelistPool(...args);
+    } catch (err) {
+      throw new TransactionRevertedError(
+        `Add whitelist pool would revert: ${extractRevertReason(err)}`,
+        extractRevertReason(err)
+      );
+    }
+
+    const tx = await contract.addWhitelistPool(...args);
+    const receipt = await tx.wait();
+    return { txHash: receipt.transactionHash };
+  }
+
+  /**
+   * Mint NFTs via a whitelist pool allocation.
+   * Both standards: whitelistMint(pool, quantity, { value })
+   */
+  async whitelistMint(
+    collectionAddress: string,
+    poolAddress: string,
+    quantity: number,
+    mintPrice: string
+  ): Promise<TxResult> {
+    const contract = await this._getCollectionContract(collectionAddress);
+    const totalCost = ethers.BigNumber.from(mintPrice).mul(quantity);
+
+    try {
+      await contract.callStatic.whitelistMint(poolAddress, quantity, { value: totalCost });
+    } catch (err) {
+      throw new TransactionRevertedError(
+        `Whitelist mint would revert: ${extractRevertReason(err)}`,
+        extractRevertReason(err)
+      );
+    }
+
+    const tx = await contract.whitelistMint(poolAddress, quantity, { value: totalCost });
+    const receipt = await tx.wait();
+    return { txHash: receipt.transactionHash };
+  }
+
+  /**
+   * Withdraw accumulated whitelist mint revenue from a collection.
+   * Both standards: withdrawWhitelistMintRevenue()
+   */
+  async withdrawWhitelistMintRevenue(collectionAddress: string): Promise<TxResult> {
+    const contract = await this._getCollectionContract(collectionAddress);
+
+    try {
+      await contract.callStatic.withdrawWhitelistMintRevenue();
+    } catch (err) {
+      throw new TransactionRevertedError(
+        `Withdraw whitelist revenue would revert: ${extractRevertReason(err)}`,
+        extractRevertReason(err)
+      );
+    }
+
+    const tx = await contract.withdrawWhitelistMintRevenue();
+    const receipt = await tx.wait();
+    return { txHash: receipt.transactionHash };
   }
 
   // ─── Private Helpers ───

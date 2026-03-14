@@ -14,6 +14,7 @@ export interface ContractAddressMap {
   socialEngagementManager: string;
   rewardsFlywheel: string;
   purchaseAuthorizer: string;
+  poolRouter: string;
 }
 
 export interface NetworkInfo {

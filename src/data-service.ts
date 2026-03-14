@@ -741,7 +741,13 @@ export class DataService {
         return { success: false, error: `HTTP ${response.status}: ${errorText}` };
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as {
+        success?: boolean;
+        signature?: string;
+        deadline?: number;
+        expires_at?: string;
+        error?: string;
+      };
       if (!data.success) {
         return { success: false, error: data.error || "Authorization failed" };
       }
