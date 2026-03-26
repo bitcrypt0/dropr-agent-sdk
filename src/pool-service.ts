@@ -225,12 +225,14 @@ export class PoolService {
     }
 
     // Determine if this is a mint (NFT drop) or claim (other prize types)
+    // Must match frontend logic: mint() only for non-escrowed prized pools (NFT drops).
+    // Escrowed prize pools (lucky-sale) have prizeCollection != 0x0 but isEscrowedPrize = true,
+    // and must use claimPrize() instead of mint().
     const isPrized: boolean = await poolContract.isPrized();
-    const prizeCollection: string = await poolContract.prizeCollection();
-    const isNFTDrop =
-      isPrized && prizeCollection !== ethers.constants.AddressZero;
+    const isEscrowedPrize: boolean = await poolContract.isEscrowedPrize();
+    const isMintable = isPrized && !isEscrowedPrize;
 
-    const method = isNFTDrop ? "mint" : "claimPrize";
+    const method = isMintable ? "mint" : "claimPrize";
 
     try {
       await poolContract.callStatic[method]();

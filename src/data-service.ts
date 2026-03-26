@@ -38,7 +38,16 @@ export class DataService {
    * List pools with optional filters. Returns mapped pool data from Supabase.
    */
   async listPools(filters?: PoolFilters): Promise<{ pools: PoolData[]; total: number }> {
-    let query = this.supabase.from("pools").select("*", { count: "exact" });
+    let query = this.supabase.from("pools").select(
+      "id, address, chain_id, name, creator, state, start_time, duration, " +
+      "slot_fee, slot_limit, slots_sold, winners_count, winners_selected, " +
+      "is_prized, prize_collection, prize_token_id, native_prize_amount, " +
+      "erc20_prize_amount, erc20_prize_token, erc20_prize_token_symbol, " +
+      "uses_custom_fee, is_refundable, is_pot_prize, artwork_url, description, " +
+      "social_engagement_required, holder_token_address, max_slots_per_address, " +
+      "created_at",
+      { count: "exact" }
+    );
 
     if (filters?.chainId) query = query.eq("chain_id", filters.chainId);
     if (filters?.creator) query = query.eq("creator", filters.creator.toLowerCase());
@@ -65,7 +74,7 @@ export class DataService {
     const { data, error, count } = await query;
     if (error) return { pools: [], total: 0 };
 
-    const pools = (data || []).map((row: Record<string, unknown>) => this._mapPoolRow(row));
+    const pools = ((data || []) as unknown as Record<string, unknown>[]).map((row) => this._mapPoolRow(row));
     return { pools, total: count ?? pools.length };
   }
 
@@ -265,7 +274,7 @@ export class DataService {
   ): Promise<unknown | null> {
     return this._callEdgeFunction("api-user", {
       address: walletAddress.toLowerCase(),
-      ...(chainId ? { chain_id: chainId } : {}),
+      ...(chainId ? { chainId } : {}),
     });
   }
 
@@ -415,6 +424,8 @@ export class DataService {
 
   /**
    * Get creator revenues aggregated per pool.
+   * Uses the server-side `get_creator_revenue_summary` RPC which handles aggregation
+   * and fee-aware reconciliation (residual < 1% of calculated → treat as fully withdrawn).
    */
   async getCreatorRevenues(
     walletAddress: string,
@@ -422,77 +433,29 @@ export class DataService {
   ): Promise<CreatorRevenueSummary | null> {
     const addr = walletAddress.toLowerCase();
 
-    let query = this.supabase
-      .from("creator_revenues")
-      .select("pool_address, chain_id, event_type, amount")
-      .eq("revenue_recipient", addr);
+    const { data, error } = await this.supabase.rpc("get_creator_revenue_summary", {
+      p_address: addr,
+      p_chain_id: chainId ?? null,
+    });
 
-    if (chainId) query = query.eq("chain_id", chainId);
+    if (error || !data) return null;
 
-    const { data: events, error } = await query;
-    if (error || !events || events.length === 0) return null;
-
-    const poolMap = new Map<
-      string,
-      { chainId: number; calculated: bigint; withdrawn: bigint }
-    >();
-
-    for (const ev of events as Record<string, unknown>[]) {
-      const key = `${ev.pool_address}:${ev.chain_id}`;
-      if (!poolMap.has(key)) {
-        poolMap.set(key, {
-          chainId: ev.chain_id as number,
-          calculated: BigInt(0),
-          withdrawn: BigInt(0),
-        });
-      }
-      const entry = poolMap.get(key)!;
-      const amt = BigInt(ev.amount as string);
-      if (ev.event_type === "calculated") {
-        entry.calculated = amt > entry.calculated ? amt : entry.calculated;
-      } else if (ev.event_type === "withdrawn") {
-        entry.withdrawn += amt;
-      }
-    }
-
-    let totalCalculated = BigInt(0);
-    let totalWithdrawn = BigInt(0);
-    const pools: CreatorRevenueSummary["pools"] = [];
-
-    for (const [key, entry] of poolMap.entries()) {
-      const [poolAddr] = key.split(":");
-      const withdrawable =
-        entry.calculated > entry.withdrawn
-          ? entry.calculated - entry.withdrawn
-          : BigInt(0);
-      totalCalculated += entry.calculated;
-      totalWithdrawn += entry.withdrawn;
-      pools.push({
-        poolAddress: poolAddr,
-        poolName: null,
-        chainId: entry.chainId,
-        calculatedAmount: entry.calculated.toString(),
-        withdrawnAmount: entry.withdrawn.toString(),
-        withdrawableAmount: withdrawable.toString(),
-        state: 0,
-      });
-    }
-
-    const totalWithdrawable =
-      totalCalculated > totalWithdrawn
-        ? totalCalculated - totalWithdrawn
-        : BigInt(0);
-
-    return {
-      pools,
-      totalCalculated: totalCalculated.toString(),
-      totalWithdrawn: totalWithdrawn.toString(),
-      totalWithdrawable: totalWithdrawable.toString(),
+    const result = data as {
+      pools: CreatorRevenueSummary["pools"];
+      totalCalculated: string;
+      totalWithdrawn: string;
+      totalWithdrawable: string;
     };
+
+    if (!result.pools || result.pools.length === 0) return null;
+
+    return result;
   }
 
   /**
    * Get collection-specific revenue data.
+   * Uses the server-side `get_collection_revenue_summary` RPC which handles aggregation
+   * and fee-aware reconciliation (residual < 1% of calculated → treat as fully withdrawn).
    */
   async getCollectionRevenues(
     collectionAddress: string,
@@ -500,76 +463,24 @@ export class DataService {
   ): Promise<CollectionRevenueSummary | null> {
     const addr = collectionAddress.toLowerCase();
 
-    let query = this.supabase
-      .from("creator_revenues")
-      .select("pool_address, chain_id, event_type, amount, revenue_recipient")
-      .eq("prize_collection", addr);
+    const { data, error } = await this.supabase.rpc("get_collection_revenue_summary", {
+      p_collection: addr,
+      p_chain_id: chainId ?? null,
+    });
 
-    if (chainId) query = query.eq("chain_id", chainId);
+    if (error || !data) return null;
 
-    const { data: events, error } = await query;
-    if (error || !events || events.length === 0) return null;
-
-    const poolMap = new Map<
-      string,
-      { chainId: number; calculated: bigint; withdrawn: bigint; revenueRecipient: string }
-    >();
-
-    for (const ev of events as Record<string, unknown>[]) {
-      const key = `${ev.pool_address}:${ev.chain_id}`;
-      if (!poolMap.has(key)) {
-        poolMap.set(key, {
-          chainId: ev.chain_id as number,
-          calculated: BigInt(0),
-          withdrawn: BigInt(0),
-          revenueRecipient: (ev.revenue_recipient as string) || "",
-        });
-      }
-      const entry = poolMap.get(key)!;
-      const amt = BigInt(ev.amount as string);
-      if (ev.event_type === "calculated") {
-        entry.calculated = amt > entry.calculated ? amt : entry.calculated;
-      } else if (ev.event_type === "withdrawn") {
-        entry.withdrawn += amt;
-      }
-    }
-
-    let totalCalculated = BigInt(0);
-    let totalWithdrawn = BigInt(0);
-    const pools: CollectionRevenueSummary["pools"] = [];
-
-    for (const [key, entry] of poolMap.entries()) {
-      const [poolAddr] = key.split(":");
-      const withdrawable =
-        entry.calculated > entry.withdrawn
-          ? entry.calculated - entry.withdrawn
-          : BigInt(0);
-      totalCalculated += entry.calculated;
-      totalWithdrawn += entry.withdrawn;
-      pools.push({
-        poolAddress: poolAddr,
-        poolName: null,
-        chainId: entry.chainId,
-        calculatedAmount: entry.calculated.toString(),
-        withdrawnAmount: entry.withdrawn.toString(),
-        withdrawableAmount: withdrawable.toString(),
-        state: 0,
-        revenueRecipient: entry.revenueRecipient,
-      });
-    }
-
-    const totalWithdrawable =
-      totalCalculated > totalWithdrawn
-        ? totalCalculated - totalWithdrawn
-        : BigInt(0);
-
-    return {
-      collectionAddress: addr,
-      pools,
-      totalCalculated: totalCalculated.toString(),
-      totalWithdrawn: totalWithdrawn.toString(),
-      totalWithdrawable: totalWithdrawable.toString(),
+    const result = data as {
+      collectionAddress: string;
+      pools: CollectionRevenueSummary["pools"];
+      totalCalculated: string;
+      totalWithdrawn: string;
+      totalWithdrawable: string;
     };
+
+    if (!result.pools || result.pools.length === 0) return null;
+
+    return result;
   }
 
   // ─── Protocol Queries ───

@@ -2,6 +2,8 @@
 
 Headless TypeScript SDK for AI agents to interact with the [dropr.fun](https://dropr.fun) protocol — no browser, no wallet extension required.
 
+> **Full Agent Capabilities Reference**: See [SKILLS.md](../SKILLS.md) for the complete machine-readable reference covering all API endpoints, SDK methods, error codes, contract addresses, rate limits, and workflow guides for AI agents. Also available at runtime via `GET /api/v1/agent/skills`.
+
 ## Overview
 
 The dropr Agent SDK enables autonomous agents to:

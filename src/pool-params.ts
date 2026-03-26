@@ -281,6 +281,7 @@ export function appendSharedParams(
     discordLink: params.discordLink || "",
     telegramLink: params.telegramLink || "",
     isPotPrize: params.isPotPrize || params.poolType === "pot-prize",
+    dropURI: params.dropURI || "",
   };
 }
 

@@ -42,6 +42,9 @@ export interface PoolCreateParams {
   // Pot prize
   isPotPrize?: boolean;
 
+  // Drop URI (external collection metadata)
+  dropURI?: string;
+
   // Metadata links
   twitterLink?: string;
   discordLink?: string;
